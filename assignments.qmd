@@ -23,6 +23,6 @@ editor: visual
 
 -   Final Presentation
 
--   Final Paper
+-   [Final Paper](https://rebeccalarsen.github.io/finalproject.pdf)
 
 -   Final Code
