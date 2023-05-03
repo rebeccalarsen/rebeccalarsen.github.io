@@ -1,0 +1,28 @@
+---
+title: "Assignments for EPPS 6323"
+editor: visual
+---
+
+## EPPS 6323 Assignments
+
+### [Assignment 1](https://r-larsen.github.io/Assignment1.html)
+
+### [Assignment 2](https://r-larsen.github.io/Assignment2.html)
+
+### [Assignment 3](https://r-larsen.github.io/Assignment3.html)
+
+### [Assignment 4](https://r-larsen.github.io/Assignment4.html)
+
+### [Assignment 5](https://r-larsen.github.io/Assignment5.html)
+
+### [Assignment 6](https://r-larsen.github.io/Assignment6.html)
+
+### [Assignment 7](https://r-larsen.github.io/Assignment7.html)
+
+### Final Group Project
+
+-   Final Presentation
+
+-   Final Paper
+
+-   Final Code

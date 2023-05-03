@@ -1,0 +1,42 @@
+---
+title: "Rebecca Larsen"
+image: mypic.png 
+about: 
+  template: trestles 
+  image-shape: rectangle
+  image-width: 15em
+  links: 
+  - text: Email
+    icon: envelope
+    href: mailto:rxl200028@utdallas.edu
+  - text: CV 
+    icon: file-text
+    href: CV.pdf 
+  - text: LinkedIn 
+    icon: linkedin
+    href: https://www.linkedin.com/in/rebeccalarsen/ 
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+::: {#hero-heading}
+## Education
+
+University of Texas at Dallas \| Dallas, TX PhD in Public Policy and
+Political Economy \| In Progress
+
+University of Texas at Austin \| Austin, TX Master of Science in Social
+Work \| 2014 Master of Public Affairs \| 2014
+
+## Teaching Experience
+
+Texas Tech University \| Assistant Professor of Practice, Political
+Science \| Sept 2021 - Present
+
+Texas Tech University \| Regional Site Manager, Instructor \| July
+2016 - Sept 2021
+
+McLennan Community College \| Part-Time Government Instructor \| Janary
+2016 - Sept 2021
+:::
