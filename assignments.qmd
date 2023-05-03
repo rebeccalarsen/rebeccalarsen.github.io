@@ -3,8 +3,6 @@ title: "Assignments for EPPS 6323"
 editor: visual
 ---
 
-## EPPS 6323 Assignments
-
 ### [Assignment 1](https://r-larsen.github.io/Assignment1.html)
 
 ### [Assignment 2](https://r-larsen.github.io/Assignment2.html)
@@ -19,10 +17,11 @@ editor: visual
 
 ### [Assignment 7](https://r-larsen.github.io/Assignment7.html)
 
+### [Assignment 8](https://r-larsen.github.io/Assignment7.html)
+
 ### Final Group Project
 
 -   [Final Presentation](https://www.canva.com/design/DAFgUG_xDJA/ONQ-wDp7wewOvzKvSajS8g/edit?utm_content=DAFgUG_xDJA&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 
 -   [Final Paper](https://rebeccalarsen.github.io/finalproject.pdf)
 
--   Final Code
