@@ -17,7 +17,7 @@ editor: visual
 
 ### [Assignment 7](https://r-larsen.github.io/Assignment7.html)
 
-### [Assignment 8](https://r-larsen.github.io/Assignment7.html)
+### [Assignment 8](https://r-larsen.github.io/Assignment8.html)
 
 ### Final Group Project
 
