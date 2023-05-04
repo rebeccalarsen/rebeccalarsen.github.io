@@ -12,3 +12,4 @@ Works in Progress:
 
 -   Predictors of Human Rights Abuses in Immigrant Detention.
 
+![](docs/mypic2.jpg){fig-align="left" width="395"}
