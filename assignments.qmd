@@ -15,7 +15,7 @@ editor: visual
 
 ### [Assignment 6](https://r-larsen.github.io/Assignment6.html)
 
-### [Assignment 7](https://r-larsen.github.io/Assignment7.html)
+### [Assignment 7](https://rebeccalarsen.github.io/Assignment7.html)
 
 ### [Assignment 8](https://rebeccalarsen.github.io/Assignment8.html)
 
