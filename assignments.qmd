@@ -11,17 +11,16 @@ editor: visual
 
 ### [Assignment 4](https://r-larsen.github.io/Assignment4.html)
 
-### [Assignment 5](https://r-larsen.github.io/Assignment5.html)
+### [Assignment 5](https://rebeccalarsen.github.io/Assignment5.html)
 
 ### [Assignment 6](https://r-larsen.github.io/Assignment6.html)
 
 ### [Assignment 7](https://r-larsen.github.io/Assignment7.html)
 
-### [Assignment 8](https://r-larsen.github.io/Assignment8.html)
+### [Assignment 8](https://rebeccalarsen.github.io/Assignment8.html)
 
 ### Final Group Project
 
 -   [Final Presentation](https://www.canva.com/design/DAFgUG_xDJA/ONQ-wDp7wewOvzKvSajS8g/edit?utm_content=DAFgUG_xDJA&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 
 -   [Final Paper](https://rebeccalarsen.github.io/finalproject.pdf)
-
