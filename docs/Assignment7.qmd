@@ -1,0 +1,95 @@
+---
+title: "Assignment 7"
+author: "Rebecca Larsen"
+format: html
+editor: visual
+---
+
+## Run lab logisticregression01 by Dr. Karl Ho
+
+```{r}
+# Load ISLR library
+
+require(ISLR)
+
+# Check dataset Smarket
+?Smarket
+names(Smarket)
+summary(Smarket)
+
+# Create a dataframe for data browsing
+sm=Smarket
+
+# Bivariate Plot of inter-lag correlations
+pairs(Smarket,col=Smarket$Direction,cex=.5, pch=20)
+
+# Logistic regression
+glm.fit=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,
+            data=Smarket,family=binomial)
+summary(glm.fit)
+glm.probs=predict(glm.fit,type="response") 
+glm.probs[1:5]
+glm.pred=ifelse(glm.probs>0.5,"Up","Down")
+attach(Smarket)
+table(glm.pred,Direction)
+mean(glm.pred==Direction)
+
+# Make training and test set for prediction
+train = Year<2005
+glm.fit=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,
+            data=Smarket,family=binomial, subset=train)
+glm.probs=predict(glm.fit,newdata=Smarket[!train,],type="response") 
+glm.pred=ifelse(glm.probs >0.5,"Up","Down")
+Direction.2005=Smarket$Direction[!train]
+table(glm.pred,Direction.2005)
+mean(glm.pred==Direction.2005)
+#Fit smaller model
+glm.fit=glm(Direction~Lag1+Lag2,
+            data=Smarket,family=binomial, subset=train)
+glm.probs=predict(glm.fit,newdata=Smarket[!train,],type="response") 
+glm.pred=ifelse(glm.probs >0.5,"Up","Down")
+table(glm.pred,Direction.2005)
+mean(glm.pred==Direction.2005)
+
+# Check accuracy rate
+106/(76+106)
+
+# Can you interpret the results?
+
+```
+
+## 
+
+Assignment Questions
+
+[a. What is/are the requirement(s) of LDA?]{.underline}
+
+Linear Discriminant Analysis is a classification system. Though it is sometimes referred to as LDA regression, like Logistic "regression" it is less of a regression modeling and more of a system of classification. The requirements are of LDA are to use it on non-quantitative outcome variables. OLS expects linear continuous relationships, but something in between categories is not a reality. The example in the ISLR Chapter 4 illustrates this well when the outcomes are seizure, stroke, and drug overdose. Here regression cannot understand different categories that are not order or binary.
+
+[b. How LDA is different from Logistic Regression?]{.underline}
+
+LDA models the distribution of predictors separately for each of the category classes, rather than considering them as a conditional distribution as is done with logistic regression. It also requires an additional step once this is done which relies on Bayes' theorem to fliip them into estimates. Logistic regression and LDA can produce very similar results *if* the distribution of the dependent variable fits normality assumptions. This is of course not always the case though, so LDA is useful when the separation between classes is believed to be large, if X distribution is assumed to be normal *but* the sample is small, and if there are more than two response classes for a categorical variable.
+
+c\. What is ROC?
+
+ROC is a curve visualization that graphs two types of errors: the sensitivity and specificity (positive and false positive rate, respectively). We interpret a ROC but examining the area underneath the curve. The closer to 1, the better we consider the model. We can use these to compare models (i.e. logistic vs. LDA) to determine which is better.
+
+d\. What is sensitivity and specificity? Which is more important in your opinion?
+
+Sensitivity over specificity, due to the importance of accurately diagnosing ill people rather than inaccurately diagnosing healthy people.
+
+e\. From the following chart, for the purpose of prediction, which is more critical?
+
+![](images/KM7.jpg){width="533"}
+
+If the above considers diagnostics testing as it does in the ISLR text, then I would say that predicting the true positive rate is the most important. This is the outcome with the most impact on humans and false negatives can be caught with other follow up diagnostics. Therefore, sensitivity over specificity is most important.
+
+f\. Calculate the prediction error from the following:
+
+![](images/KM7.2.jpg){width="435"}
+
+Error calculation: total number of incorrect predictions over total number of predictions.
+
+(23+252)/10,000 = 0.0275
+
+This is pretty good, considering the error rate ranges from 0 to 1.
