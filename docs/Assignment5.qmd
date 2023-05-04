@@ -1,0 +1,260 @@
+---
+title: "Assignment5"
+author: "Rebecca Larsen"
+format: html
+editor: visual
+---
+
+# **Part 1: Text Mining Lab 1 by Dr. Karl Ho**
+
+### Load libraries
+
+```{r}
+# install and load pacman for package management
+if (!require("pacman", character.only = TRUE)) install.packages("pacman")
+library(pacman)
+# load libraries using pacman
+p_load("easypackages","XML","wordcloud","RColorBrewer","NLP","tm","quanteda","quanteda.textstats", "easypackages","rtweet","tidyverse","RColorBrewer","tidytext","syuzhet", "plotly")
+
+```
+
+### Download text data from website
+
+```{r}
+mlk_speech <-URLencode("http://www.analytictech.com/mb021/mlk.htm")
+```
+
+### Use htmlTreeParse function to read and parse paragraphs
+
+```{r}
+doc.html<- htmlTreeParse(mlk_speech, useInternal=TRUE)
+mlk <- unlist(xpathApply(doc.html, '//p', xmlValue))
+
+head(mlk, 3)
+
+words.vec <- VectorSource(mlk)
+```
+
+### Check class of words
+
+```{r}
+class(words.vec)
+```
+
+### Create Corpus and Turn words lowercase
+
+```{r}
+# Create Corpus object for preprocessing
+words.corpus <- Corpus(words.vec)
+inspect(words.corpus)
+# Turn all words to lower case
+words.corpus <- tm_map(words.corpus, content_transformer(tolower))
+```
+
+### Use tm_map to remove punctuation, numbers, and stopwords
+
+```{r}
+words.corpus <- tm_map(words.corpus, removePunctuation)
+words.corpus <- tm_map(words.corpus, removeNumbers)
+words.corpus <- tm_map(words.corpus, removeWords, stopwords("english"))
+#Can use same approach to remove symbols, specific words, etc. 
+```
+
+### Create a Term Document Matrix
+
+```{r}
+tdm <- TermDocumentMatrix(words.corpus)
+inspect(tdm)
+
+m <- as.matrix(tdm)
+wordCounts <- rowSums(m)
+wordCounts <- sort(wordCounts, decreasing=TRUE)
+head(wordCounts)
+```
+
+### Create a Word Cloud
+
+```{r}
+cloudFrame<-data.frame(word=names(wordCounts),freq=wordCounts)
+
+set.seed(1234)
+wordcloud(cloudFrame$word,cloudFrame$freq)
+wordcloud(names(wordCounts),wordCounts, min.freq=1,random.order=FALSE, max.words=200,scale=c(4,.5), rot.per=0.35,colors=brewer.pal(8,"Dark2"))
+```
+
+### \# N-gram with two to three words
+
+```{r}
+textstat_collocations(mlk, size = 2:3) 
+```
+
+## Re-running on Churchill's Finest Hour Speech
+
+```{r}
+# Run the program on Winston Churchill's Finest Hour speech?
+winston_speech <-URLencode("http://www.historyplace.com/speeches/churchill-hour.htm")
+```
+
+```{r}
+doc.html<- htmlTreeParse(winston_speech, useInternal=TRUE)
+winston <- unlist(xpathApply(doc.html, '//p', xmlValue))
+
+head(winston, 3)
+
+words.vec <- VectorSource(winston)
+```
+
+```{r}
+class(words.vec)
+```
+
+```{r}
+# Create Corpus object for preprocessing
+words.corpus <- Corpus(words.vec)
+inspect(words.corpus)
+# Turn all words to lower case
+words.corpus <- tm_map(words.corpus, content_transformer(tolower))
+```
+
+```{r}
+words.corpus <- tm_map(words.corpus, removePunctuation)
+words.corpus <- tm_map(words.corpus, removeNumbers)
+words.corpus <- tm_map(words.corpus, removeWords, stopwords("english"))
+```
+
+```{r}
+tdm <- TermDocumentMatrix(words.corpus)
+inspect(tdm)
+
+m <- as.matrix(tdm)
+wordCounts <- rowSums(m)
+wordCounts <- sort(wordCounts, decreasing=TRUE)
+head(wordCounts)
+```
+
+```{r}
+cloudFrame<-data.frame(word=names(wordCounts),freq=wordCounts)
+
+set.seed(1234)
+wordcloud(cloudFrame$word,cloudFrame$freq)
+wordcloud(names(wordCounts),wordCounts, min.freq=1,random.order=FALSE, max.words=200,scale=c(4,.5), rot.per=0.35,colors=brewer.pal(8,"Dark2"))
+```
+
+```{r}
+textstat_collocations(winston, size = 2:3) 
+```
+
+\-\-\-\-\-\-\-\-\--
+
+## Part 2: Sentiment_Tidytext01 Lab
+
+by Dr. Karl Ho
+
+NOTE: I was unable to get tweeds to work properly or get Twitter API access by the end of the semester, so I ran these labs on our group data project. This data pulled boycott tweets on the Qatar World Cup. They were mined from Twitter by Humza in our group who has Twitter API access and our data is hosted by Shawn's shared posit folders.
+
+```{r}
+#Load the data 
+tweets_boycott <- read.csv("https://shawnnstewart.github.io/test_data/tweets_boycott.csv?raw=true")
+```
+
+```{r}
+# Plot by time
+
+ts_plot(tweets_boycott,"mins",cex=.25,alpha=1) +
+  theme_bw() +
+  theme(text = element_text(family="Palatino"),
+        plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5),plot.caption = element_text(hjust = 0.5)) +
+  labs(title = "Frequency of keyword 'boycott Qatar World Cup' used in last 100,000 Twitter tweets",
+       subtitle = "Twitter tweet counts aggregated per minute interval ",
+       caption = "\nSource: Data collected from Twitter's REST API via rtweet",hjust = 0.5)
+```
+
+```{r}
+# Preprocess text data
+boycotttxt= tweets_boycott$text
+# boycotttxt = tweets_boycott$text
+textDF <- tibble(txt = tweets_boycott$text)
+tidytwt= textDF %>% 
+  unnest_tokens(word, txt)
+tidytwt <- tidytwt %>%  anti_join(stop_words) # Removing stopwords
+
+tidytwt %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 500) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col() +
+  xlab("Keyword") + ylab("Count") +
+  coord_flip() + theme_bw()
+
+tidytwt <- tidytwt %>%
+  mutate(linenumber = row_number()) # create linenumber
+```
+
+hjk;
+
+```{r}
+# Joining bing lexicon using on average tweet of 12 words.
+
+sentiment_tw <- tidytwt %>%          
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 12, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(sentiment_tw, aes(index, sentiment)) +
+  geom_col(show.legend = FALSE)+theme_bw()
+
+
+sentiment_tw$posneg=ifelse(sentiment_tw$sentiment>0,1,ifelse(sentiment_tw$sentiment<0,-1,0))
+
+```
+
+```{r}
+# Use Plotly library to plot density chart
+ggplot(sentiment_tw, aes(sentiment, fill = posneg)) + 
+  geom_density(alpha = 0.5, position = "stack") + 
+  ggtitle("stacked sentiment density chart")+theme_bw()
+
+
+bing_word_counts <- tidytwt %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+
+bing_word_counts %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free_y") +
+  labs(y = "Sentiments toward Qatar World Cup - 2015 to 2022",
+       x = NULL) +
+  coord_flip() + theme_bw()+ theme(strip.text.x = element_text(family="Palatino"), 
+                                   axis.title.x=element_text(face="bold", size=15,family="Palatino"),
+                                   axis.title.y=element_text(family="Palatino"), 
+                                   axis.text.x = element_text(family="Palatino"), 
+                                   axis.text.y = element_text(family="Palatino"))
+
+```
+
+## Part 3: Sentiment_Syuzhet01
+
+```{r}
+#This ran slowly and timed out after several attempts. So I am going to pull a random sample of 1,000 tweets from the dataset to run this on. 
+#n=1000
+sampleboycott <- tweets_boycott[sample(nrow(tweets_boycott), size=1000), ]
+# Sentiment analysis
+twtweets <- iconv(sampleboycott$text) # convert text data encoding
+tw_sent_nrc <- get_nrc_sentiment(twtweets) # Get sentiment scores using NRC lexicon
+barplot(colSums(tw_sent_nrc),
+        las = 2,
+        col = rainbow(10),
+        ylab = 'Count',
+        main = 'Sentiment Scores Tweets of "Qatar WC"')
+
+tw_sent <- get_sentiment(twtweets) # Get sentiment scores 
+plot(tw_sent, pch=20, cex = .3, col = "blue")
+```
