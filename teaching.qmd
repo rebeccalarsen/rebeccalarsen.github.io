@@ -3,7 +3,7 @@ title: "Teaching"
 editor: visual
 ---
 
-### Syllabi 
+### Syllabi
 
 -   [POLS 3314: Intro to Political Analysis](https://rebeccalarsen.github.io/3314.pdf)
 
@@ -21,7 +21,7 @@ editor: visual
 
 -   [POLS 4000: Active Learning - Texas Legislative Advocacy](https://rebeccalarsen.github.io/4000.pdf)
 
-### Sample of Course Materials 
+### Sample of Course Materials
 
 POLS 4000: Active Learning - Texas Legislative Advocacy
 
@@ -43,8 +43,8 @@ POLS 3300: Special Topics - Criminal Justice Reforms
 
 ### Guest Lectures
 
--   Larsen, R. (2021). *Considering the Death Penalty in the Human Rights Context*. Invited Guest Lecture in PSCI 4357: Human Rights. University of Texas at Dallas. \
+-   Larsen, R. (2021). *Considering the Death Penalty in the Human Rights Context*. Invited Guest Lecture in PSCI 4357: Human Rights. University of Texas at Dallas.\
     [Link to Presentation](https://rebeccalarsen.github.io/HR.pdf)
 
--   Larsen, R. (2021). *The Evolving Administration of the Endangered Species Act.* Invited Guest Lecturer in BIO 4101: Biology Seminar. Texas Tech University. \
+-   Larsen, R. (2021). *The Evolving Administration of the Endangered Species Act.* Invited Guest Lecturer in BIO 4101: Biology Seminar. Texas Tech University.\
     [Link to Presentation](https://rebeccalarsen.github.io/ESA.pdf)
