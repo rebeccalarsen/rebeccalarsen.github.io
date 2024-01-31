@@ -1,0 +1,50 @@
+---
+title: "Teaching"
+editor: visual
+---
+
+### Syllabi 
+
+-   [POLS 3314: Intro to Political Analysis](https://rebeccalarsen.github.io/3314.pdf)
+
+-   [POLS 3300: Special Topics - Criminal Justice Reforms](https://rebeccalarsen.github.io/3300.pdf)
+
+-   [POLS 3318: Public Opinion](https://rebeccalarsen.github.io/3318.pdf)
+
+-   [POLS 3353: Civil Rights and Liberties](https://rebeccalarsen.github.io/3353.pdf)
+
+-   [POLS 3352: Constitutional Law - Powers](https://rebeccalarsen.github.io/3352.pdf)
+
+-   [POLS 3303: Special Topics - Nonprofits in Society](https://rebeccalarsen.github.io/3303.pdf)
+
+-   [POLS 3317: Campaigns and Elections](https://rebeccalarsen.github.io/3317.pdf)
+
+-   [POLS 4000: Active Learning - Texas Legislative Advocacy](https://rebeccalarsen.github.io/4000.pdf)
+
+### Sample of Course Materials 
+
+POLS 4000: Active Learning - Texas Legislative Advocacy
+
+-   [Public Policy Debate Assignment](https://rebeccalarsen.github.io/debate.pdf).
+
+-   [Semester-Long Advocacy Project](https://rebeccalarsen.github.io/advocacy.pdf).
+
+POLS 3352: Constitutional Law - Powers
+
+-   [Hypothetical Portion of Exam to Supplement Traditional Exam](https://rebeccalarsen.github.io/exam.pdf).
+
+POLS 3353: Civil Rights and Liberties
+
+-   [Midterm Exam](https://rebeccalarsen.github.io/exam2.pdf).
+
+POLS 3300: Special Topics - Criminal Justice Reforms
+
+-   [Book Report and Policy Issue Update](https://rebeccalarsen.github.io/book.pdf).
+
+### Guest Lectures
+
+-   Larsen, R. (2021). *Considering the Death Penalty in the Human Rights Context*. Invited Guest Lecture in PSCI 4357: Human Rights. University of Texas at Dallas. \
+    [Link to Presentation](https://rebeccalarsen.github.io/HR.pdf)
+
+-   Larsen, R. (2021). *The Evolving Administration of the Endangered Species Act.* Invited Guest Lecturer in BIO 4101: Biology Seminar. Texas Tech University. \
+    [Link to Presentation](https://rebeccalarsen.github.io/ESA.pdf)

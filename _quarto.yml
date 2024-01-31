@@ -12,6 +12,10 @@ website:
       text: About 
     - href: CV.pdf
       text: CV 
+    - href: research.qmd
+      text: Research 
+    - href: teaching.qmd
+      text: Teaching 
     - href: assignments.qmd
       text: Assignments 
 
