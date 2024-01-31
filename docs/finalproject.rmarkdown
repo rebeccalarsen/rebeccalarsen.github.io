@@ -1,0 +1,1030 @@
+---
+title: "Exploring Labor Rights in Qatar through World Cup Boycott Tweets"
+subtitle: "EPPS 6323 - Final Project"
+author: "Shawn Stewart, Rebecca Larsen, and Humza Khan"
+format: html
+editor: visual
+execute:
+  warning: false
+---
+
+
+**Load Libraries**
+
+
+```{r}
+# install and load pacman for package management
+if (!require("pacman", character.only = TRUE)) install.packages("pacman")
+library(pacman)
+# load libraries using pacman
+p_load("Hmisc", 
+        "tidyverse",
+        "tidytext",
+        "XML",
+        "wordcloud",
+        "RColorBrewer",
+        "NLP",
+        "tm",
+        "quanteda",
+        "quanteda.textstats" ,
+        "rtweet",
+        "igraph",
+        "ggraph",
+        "reshape2",
+        "ggridges",
+        "lubridate",
+        "maps",
+        "syuzhet",
+        "textdata",
+        "easypackages", 
+        "boot",
+        "kknn",
+        "caret",
+        "leaps", 
+        "stargazer",
+        "corrplot", 
+        "xtable")
+```
+
+
+## Using Twitter API v2 - Academic Research
+
+Here we detail the attempts and successful approach to scraping tweets for our data sets. Note, this code is configured not to run, as it relies on user-specific Twitter API access.
+
+
+```{r}
+#| eval: false
+#| echo: true
+
+## Scraping and creation of dataset by Humza Khan 
+## Using Twitter API v2 - Academic Research 
+
+#multiple methods were tested to scrape, (shown below), academictwittR using #Twitter API v2 for academic research was final method used
+
+#library(rtweet) 
+#library(academictwitteR) 
+#install.packages("httr")
+#library(httr)
+
+# Set bearer token
+#bearer_token <- "AAAAAAAAAAAAAAAAAAAAAKMMlwE
+# Set API endpoint
+
+#The endpoint is the URL that specifies the location of the server where the #API requests are sent.
+#api_endpoint <- "https://api.twitter.com/2/tweets/search/recent"
+
+#
+#query_params <- list(
+#  query = "#boycottqatar2022",
+#  start_time = "2016-01-20T00:00:00Z",
+#  end_time = "2023-01-01T00:00:00Z",
+#  max_results = 100,
+#  tweet.fields = "created_at,public_metrics,text",
+#  expansions = "author_id",
+#  user.fields = "name,username,verified")
+
+#demo of 100 tweets
+#response <- GET(
+#  url = "https://api.twitter.com/1.1/statuse",
+#  config = config(token = "AAAAAAAAAAAAAAAAAAAAACP4hwEAA"))
+#
+
+#tweets <- search_tweets(
+#  "boycottqatar2022",
+#  n = 100,
+#  token = token,
+#  retryonratelimit = TRUE)
+
+#Authentication with Twitter
+#establish a connection between R  and Twitter's API
+#1. an API key 
+#2. an API secret
+#3. an access token
+#4. an access token secret
+
+# Set up Twitter connection (keys are dummy, not actual keys because of privacy)
+#consumer_key <- "WSn8c2FaoByAl7 
+#consumer_secret <- "tHMzhr4EsLIiRhh 
+#access_token <- "15791757384644034 
+#access_token_secret <- "XPMjZYKcu8v 
+#setup_twitter_oauth(consumer_key, consumer_secret, access_token, #access_token_secret)
+#1
+
+#tweets <- search_tweets(
+#  "#boycottqatar2022",
+#  n = 100,
+#  token = token,
+#  retryonratelimit = FALSE)
+
+#the following code shows the data scraping for the original dataset of 3.5 million tweets. 
+
+#This portion of the code is not meant to be run again. 
+
+#vignette
+#??academictwitteR
+
+#token shown is a dummy/example token
+#remove #, run code: adds your bearer token to set_bearer() as a safe way
+#TWITTER_BEARER=AAAADUMMYTOKEN
+
+#set up your bearer token in your .Renviron file (remove #)
+#set_bearer()
+
+#get b token
+#get_bearer()
+
+#check api connection, sample of 1000 for this attempt
+
+#tweets <- get_all_tweets(query = c("#boycottqatar2022", "#boycottqatar",  "#worldcupqatar",
+#                                 "#worldcupqatar2022", "#qatarworldcup", "#qatarworldcup2022"),
+#                         start_tweets = "2015-01-20T00:00:00Z",  
+#                         end_tweets = "2023-01-29T00:00:00Z",
+#                         data_path = "C:The University of Texas at Dallas/1 Spring 2023/Knowledge Mining/Group Term Paper",
+#                         file = "qatartd",
+#                         n = 1000)
+
+################# THIS IS THE ATTEMPT THAT PULLS THE DATASET WE USE############
+#attempt pulls all the tweets (infinite/inf)
+
+###
+#tweets <- get_all_tweets(query = c("#boycottqatar2022", "#boycottqatar",  "#worldcupqatar",
+ #                                  "#worldcupqatar2022", "#qatarworldcup", "#qatarworldcup2022"),
+#                        start_tweets = "2015-01-20T00:00:00Z",  
+#                        end_tweets = "2023-01-29T00:00:00Z",
+ #                        data_path = "C:/Users/hakha/OneDrive - The University of Texas at Dallas/1 Spring 2023/Knowledge Mining/Group Term Paper/data/tweets",
+#                         file = "qatartd",
+#                         n = Inf)
+
+# save data frame to an RDS file (binary file format used for storing R #objects#, such as data frames)
+#saveRDS(qatarwc, file = "qwc.RDS")
+
+# The analysis does not use 3.5 million tweets, a smaller sample is used
+```
+
+
+## Parsing JSON files
+
+After scraping the data, the tweet payload came through as multiple JSON files. The code below successfully parses the various JSON files into three distinct tables (tweets, users, and places) and combines them. However, it will break on random JSON files, saying that "\_\_\_\_ column does not exist." For the tweets data frame (the first section of the for loop) we included some basic error-handling to add columns that don't exist.
+
+This is the code used to generate the tweets that we are using for analysis. We did not find a solution to the code breaking on columns that do not exist, but the last run of the code generated a data frame with about 3.6 million tweets, which is close to what we expected to see.
+
+Our group made the decision to move forward with the data that we were able to format as a data frame, even though it is possible that some tweets were excluded.
+
+**Explanation of the code**
+
+Drawing from examples found online (ElHabr, R. O. T. 2018; Periscopic 2022), we approached this parsing challenge using for loops and the jsonlite package. First, we give R the directory where the files are stored and create a list of all of the JSON files. Then, we loop through these files, reading and processing each one. We use jsonlite to read the files and unnest the data. Without unnesting the data, the end result would be a data frame that contains lists and other data frames.
+
+The loop uses several conditional statements to process the data. First, it must decide whether the JSON file has "data" in its title or "user." The data and user files contain different types of information and are nested in different ways. Then, it extracts the fields we want to see in our final data frame and appends them to the main data frame.
+
+Upon running this code with the full set of data, we encountered a challenging error. It seems that the JSON files do not all have the same variables. For instance, some include geo.place_id but many do not. When the for loop encounters a file that does not have all of the required columns, it throws an error when trying to bind the data from that particular file with the larger data frame.
+
+We added some basic error handling to try to manage this challenge. The error handling looks at the data frame currently being processed in the for loop, and adds any missing columns to the data frame. This was a very manual solution, and it was only partially successful. When we ran the code against the full set of JSON files, we managed to parse over 3 million tweets. However, after running overnight, the code did throw an error message, indicating that some tweets may not have been added to our data frame.\
+
+
+```{r}
+#| eval: false
+#| echo: true
+
+# # get list of all file names in the scraped data
+# folder_path <- "/Users/shawnstewart/Downloads/tweets/"
+# #folder_path <- "/Users/shawnstewart/Desktop/test"
+# file_names <- list.files(folder_path)
+# 
+# # create empty dataframes to append to
+# tweets_df <- data.frame()
+# users_df <- data.frame()
+# places_df <- data.frame()
+# 
+# # loop through all files, adding each to appropriate data frame
+# for (file_name in file_names) {
+#     file_path <- paste0(folder_path,"/", file_name)
+#     
+#     # if a "data" file
+#     if(grepl("data", file_path, fixed = TRUE)){
+#         tweet <- fromJSON(file_path, flatten = TRUE) %>% as.data.frame
+# 
+#         # add a column for variables that don't exist
+#         # list the columns we want to include in dataframe
+#         cols <- c("author_id", "geo.place_id","conversation_id",
+#                   "in_reply_to_user_id", "created_at", "id", "text",
+#                   "lang", "public_metrics.retweet_count","public_metrics.like_count",
+#                   "public_metrics.impression_count", "public_metrics.reply_count",
+#                   "public_metrics.quote_count", "attachments.media_keys")
+#         
+#         # use a for loop to check if exists, if not, add it
+#         for(col in cols){
+#             if(!(col %in% colnames(tweet))){
+#                 tweet[[col]] <- NA
+#             }
+#         }
+#        
+#         # select just the columns we want, and bind to the dataframe
+#         tweet <- tweet |>
+#             select(all_of(cols))
+#         tweets_df <- rbind(tweets_df, tweet)
+#     }
+# 
+#     # if a "user" file
+#     if(grepl("user", file_path, fixed = TRUE)){
+#         # get places
+#         places <- fromJSON(file_path)
+#         places <- places[3][1] %>% as.data.frame() %>%
+#             select(places.country, places.id,
+#                    places.name, places.place_type,
+#                    places.full_name, places.country_code)
+#         places_df <- rbind(places_df, places)
+# 
+#         # get users
+#         users <- fromJSON(file_path)
+#         users <- tibble(user_info = users[1])
+#         users <- users |> 
+#             unnest_longer(user_info) |> 
+#             unnest_wider(user_info) |> 
+#             unnest_wider(public_metrics) |> 
+#             unnest_wider(entities, names_sep = ".") |> 
+#             unnest_wider(entities.description) |> 
+#             select("created_at", "location", "followers_count", "following_count",
+#                    "tweet_count", "listed_count", "name", "username", "description")
+#         users_df <- rbind(users_df, users)
+#     }
+# }
+```
+
+
+### Subsetting the data for use
+
+After discussing with Dr. Ho, we decided to take a small sample of our 3.6 million tweets to work with. To start with, we decided to just look at tweets in English and Arabic with a geolocation code for Qatar.
+
+We did that with the following code.
+
+
+```{r}
+#| eval: false
+#| echo: true
+
+# tweets_sample <- tweets_df |> 
+#     filter(geo.place_id == "0181f32937df0de8") |> 
+#     filter(lang == "en" | lang == "ar") 
+```
+
+
+This yielded around 1300 tweets, many of which do not mention labor rights at all. This became a challenge as we began doing the exploratory text analysis. So, we decided to expand our sample. We drew two additional samples from the mass set of tweets.
+
+**Just 2022**
+
+We decided to look at just tweets in Arabic and English from 2022. This code returns just under 1.7 million tweets.
+
+
+```{r}
+#| eval: false
+#| echo: true
+
+# note, we are taking advantage of the created_at field being a string with the left-most characters being the dates. 
+# tweets_2022 <- tweets |> 
+#     filter(lang == "en" | lang == "ar") |> 
+#     filter(substr(created_at,1, 4) == 2022 )
+```
+
+
+**Tweets that mention boycott**
+
+We also decided to look at tweets from the entire set that are mention "boycott." For this sample, we are just looking at tweets in English. This code returns about 76k tweets.
+
+This is the data set primarily used throughout the remainder of our analysis.
+
+
+```{r}
+#| eval: false
+#| echo: true
+
+# tweets_boycott <- tweets |> 
+#     filter(lang == "en") |> 
+#     filter(grepl("boycott", tolower(text), fixed = TRUE))
+```
+
+
+## Load data
+
+The sample of tweets including the word "boycott" and the very small sample of tweets with geo-locations in Qatar were uploaded to GitHub and can be accessed through the following code.
+
+
+```{r}
+# tweets that mention "boycott"
+tweets_boycott <- read.csv("https://shawnnstewart.github.io/test_data/tweets_boycott.csv?raw=true")
+
+# tweets only from geolocation in Qatar
+tweets_qatar <- read.csv("https://shawnnstewart.github.io/test_data/tweets_sample.csv?raw=true")
+
+# NRC lexicon
+nrc <- get_sentiments("nrc") #from tidytext
+
+#NOTE if problems loading: PC/New versions of R studio require "read.csv" to correctly call the dataset. Older versions require "read_csv". 
+```
+
+
+## Unnesting and Cleaning the Tweet Data
+
+We began by using Silge and Robinson's (2017) approach to combining the NRC emotions and sentiment polarity with our dataset. As we load in the data, we use dplyr's mutate function with gsub() to do some initial cleaning.
+
+
+```{r}
+tweets <- tweets_boycott %>%
+      mutate(text = gsub("http\\S+", "", text)) %>%  # remove URLs
+      mutate(text = gsub("@\\S+", "", text)) %>% # remove mentions
+      filter(lang == "en") # keep only English tweets, note for boycott it's already filtered
+```
+
+
+Next, we unnest the tweets and remove stop words.
+
+
+```{r}
+#| include: false
+
+# unnest your tweets so that there is one word per line
+tweets_tidy <- tweets |> 
+    unnest_tokens(word, text)
+
+tweets_tidy <- tweets_tidy |> 
+    anti_join(stop_words)
+
+```
+
+
+#### Identifying additional stop words.
+
+When we look at the data set, the most common words are things like Qatar, fifa world cup, 2022, etc. These do not really help us understand what is happening in a given tweet or what the topics of discussion are, since we already know our research topic is the 2022 FIFA world cup in Qatar. So we removed them to see how our analysis changes when we remove these common words. We also remove the hashtags that we used to pull the data (since these will obviously be in every tweet).
+
+Note, we also accounted for common misspellings of "Qatar" in these additional stop words (ie, "Quatar").
+
+
+```{r}
+#| include: false
+
+addtl_stop_words <- c("fifa",
+                    "fifaworldcup",
+                    "qatar",
+                    "qatarworldcup2022",
+                    "boycottqatar2022", 
+                    "boycottqatar",
+                    "worldcupqatar",
+                    "worldcupqatar2022", 
+                    "qatarworldcup", 
+                    "qatarworldcup2022",
+                    "worldcup2022",
+                    "world",
+                    "cup",
+                    "rt",
+                    "2022",
+                    "qatar2022", 
+                    "fifaworldcup", 
+                    "fifaworldcup2022", 
+                    "2",
+                    "quatar",
+                    "quatarworldcup2022",
+                    "boycottquatar2022", 
+                    "boycottquatar",
+                    "worldcupquatar",
+                    "worldcupquatar2022", 
+                    "quatarworldcup", 
+                    "quatarworldcup2022",
+                    "quatar2022"
+                    )
+
+custom_stop_words <- bind_rows(
+    tibble(word = addtl_stop_words,
+               lexicon = c("custom")),
+    stop_words)
+
+tweets_tidy <- tweets_tidy |> 
+    anti_join(custom_stop_words)
+```
+
+
+## Word Cloud
+
+We created an initial word cloud, using Silge & Robinson's (2017) approach to word clouds.
+
+
+```{r}
+tweets_tidy|> 
+    count(word) |> 
+    with(wordcloud(word, n, max.words = 66, min.freq=20))
+```
+
+
+## Sentiment Analysis
+
+We conducted sentiment analysis using the NRC Word-Emotion Association Lexicon by Mohammad & Turney (2022).
+
+After experiencing challenges with the NRC full sentiment analysis from the syuzhet package timing out or taking 10+ hours to run, we approached the NRC Lexicon by combining the NRC emotions with our data set and exploring each emotion individually.
+
+We built a function that we then call for each emotion in the NRC Lexicon, using a loop. The NRC loaded with this code came from tidytext and includes 13872 observations with 10 different sentiments (8 emotions and 2 polarity indicators).
+
+
+```{r}
+#| include: false
+
+# first, get the list of emotions/polarities we want to split by
+emotions <- distinct(nrc, sentiment)
+
+# then, we want to make a function that takes an emotion and a dataset and returns a column in that dataset with a binary variable for each word, saying which emotions it is associated with. The function will need the name of the emotion as it appears in the lexicon and assums the dataset is unnested at the word level. 
+
+# We give it a unique name to avoid issues with downloaded libraries and naming conflicts. We also use "emo" instead of "sentiment" so it does not cause conflicts with the default name of columns in NRC. 
+
+# lexicon and emo should be strings, like "nrc" and "disgust" because they will be fed into another function. This function will take "nrc" as the default lexicon. 
+
+emo_column <- function(df, emo, lexicon = "nrc"){
+    # we are first going to extract just those sentiment words from lexicon
+    # let's give our subset a name
+    lexicon_subset <- paste0(lexicon,"_", emo)
+    lexicon_subset <- get_sentiments(lexicon) %>%
+         filter(sentiment == emo)
+
+    df <- df %>%
+        full_join(lexicon_subset) |>
+        rename({{emo}} := sentiment) |>
+        mutate(!!emo := ifelse(is.na(!!sym(emo)), 0, 1))    
+    return(df)
+}
+
+# now that the function works, we run it through a for loop to create columns for each emotion/polarity in nrc
+
+# get list of emotions from the nrc lexicon
+emotions_list <- unique(nrc$sentiment)
+
+for(emotion in emotions_list){
+    tweets_tidy <- emo_column(tweets_tidy, emotion)
+}
+```
+
+
+### Emotions by top words
+
+Here we create lists of top words by polarity and emotion. We then create bar plots of top words by each emotion. We assign colors to each emotion bar plot, using Nijdam's (2009) research "Mapping emotion to color," so that colors are applied based on empirical assessments of color and emotional response.
+
+
+```{r}
+# most common overall
+tweets_tidy %>%
+    count(word, sort = TRUE) %>%
+    filter(n > 2000) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col() +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words overall", y="Frequency")
+    
+
+# most common by emotions/polarity
+# negative
+tweets_tidy %>%
+    filter(negative == 1) %>%
+    count(word, sort = TRUE) %>%
+    filter(n>500) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col(fill="darkred") +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words - negative", y="Frequency")
+
+
+# anger
+tweets_tidy %>%
+    filter(anger == 1) %>%
+    count(word, sort = TRUE) %>%
+    filter(n>500) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col(fill="red") +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words - anger", y="Frequency")
+
+#fear
+
+tweets_tidy %>%
+    filter(fear == 1) %>%
+    count(word, sort = TRUE) %>%
+    filter(n>500) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col(fill="black") +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words - fear", y="Frequency")
+
+# disgust
+
+tweets_tidy %>%
+    filter(disgust == 1) %>%
+    count(word, sort = TRUE) %>%
+    filter(n>500) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col(fill="greenyellow") +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words - disgust", y="Frequency")
+
+#sadness
+
+tweets_tidy %>%
+    filter(sadness == 1) %>%
+    count(word, sort = TRUE) %>%
+    filter(n>500) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col(fill="darkblue") +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words - sadness", y="Frequency")
+
+#positive
+tweets_tidy %>%
+    filter(positive == 1) %>%
+    count(word, sort = TRUE) %>%
+    filter(n>500) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col(fill="lightblue") +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words - positive", y="Frequency")
+
+# trust
+tweets_tidy %>%
+    filter(trust == 1) %>%
+    count(word, sort = TRUE) %>%
+    filter(n>500) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col(fill="turquoise") +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words - trust", y="Frequency")
+
+# surprise
+tweets_tidy %>%
+    filter(surprise == 1) %>%
+    count(word, sort = TRUE) %>%
+    filter(n>500) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col(fill="orange") +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words - surprise", y="Frequency")
+
+
+# joy
+tweets_tidy %>%
+    filter(joy == 1) %>%
+    count(word, sort = TRUE) %>%
+    filter(n>500) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col(fill="yellow") +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words - joy", y="Frequency")
+
+# anticipation
+tweets_tidy %>%
+    filter(anticipation == 1) %>%
+    count(word, sort = TRUE) %>%
+    filter(n>500) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(word, n)) +
+    geom_col(fill="purple") +
+    xlab(NULL) +
+    coord_flip() +
+    labs(title="Most common words - anticipation", y="Frequency")
+
+
+```
+
+
+## Full tweets
+
+So far we have analyzed emotions across individual words, unnested in our first cleaning steps. We also want to see sentiment for each tweet. We start by collapsing our data back to the tweet level, including a total count of words in each emotion category and a concatenated string of the original tweet (minus any stop words, punctuation, and other text that has been cleaned out).
+
+
+```{r}
+#| include: false
+
+# get sums of emotion words grouped by tweet 
+# we also add a column with the cleaned tweet text
+tweets_tidy_sum <- tweets_tidy |> 
+    group_by(id, author_id, conversation_id) |> 
+    dplyr::summarize(negative = sum(negative),
+              positive = sum(positive),
+              fear = sum(fear),
+              sadness = sum(sadness),
+              anger = sum(anger),
+              disgust = sum(disgust),
+              trust = sum(trust),
+              surprise = sum(surprise),
+              joy = sum(joy),
+              anticipation = sum(anticipation),
+              text = paste(word, collapse=" ")
+              )
+```
+
+
+### Hierarchical Clustering
+
+We referred to Raghav Bali, Dipanjan Sarkar, & Tushar Sharma's (2017) book to explore heirarchical clustering. This is an unsupervised learning approach to clustering data. It should show which words show up in clusters together.
+
+
+```{r}
+
+# Create vector
+words.vec <- VectorSource(tweets_tidy_sum$text)
+wordCorpus <- Corpus(words.vec)
+
+# Bali, Shakar, and Sharma's (2017) code to plot hierarchical clusters
+# computer term-document matrix
+twtrTermDocMatrix <- TermDocumentMatrix(wordCorpus)
+
+twtrTermDocMatrix2 <- removeSparseTerms(twtrTermDocMatrix,
+                                        sparse = 0.97)
+
+tweet_matrix <- as.matrix(twtrTermDocMatrix2)
+
+# prepare distance matrix
+distMatrix <- dist(scale(tweet_matrix))
+# perform hierarchical clustering
+fit <- hclust(distMatrix,method="single")
+# plot the dendrogram
+plot(fit)
+
+```
+
+
+This starts to show some interesting information, but is rather flat. We do see some things we would anticipate, such as "human" and "rights" clustering together. Towards the right of the graph, you can also see "shirt", "wearing", "solidarity" and "nike" clustering together, which begins to pull out relevant topics that would have been hard to see otherwise.
+
+### syuzhet Sentiment Analysis
+
+After trying multiple approaches to a full sentiment analysis and continuing to experience long run times and crashes, we created a full sentiment analysis with a small random sample of our data.
+
+
+```{r}
+#| warning: false
+
+#make this example reproducible
+set.seed(20)
+
+#n=300
+rand_df <- tweets_tidy[sample(nrow(tweets_tidy), size=300), ]
+
+sent.tweets <- iconv(tweets_tidy$word) # convert text data encoding
+
+sent_nrc <- get_nrc_sentiment(sent.tweets) # Get sentiment scores using NRC lexicon
+
+barplot(colSums(sent_nrc),
+        las = 2,
+        col = rainbow(15),
+        ylab = 'Frenquency',
+        main = 'Sentiment Scores Tweets of "Boycott Tweets"')
+
+# Create a barplot with the total as the height
+barplot(sent_nrc$positive + sent_nrc$positive, height = total)
+
+#of the 300 tweets, only 2 are both positive and negative, a small number of tweets
+#are neither positive or negative, most tweets are positive or negative
+
+```
+
+
+# By Time and Keywords
+
+## Time
+
+Finally, we examine when the tweets were created. We set up columns when creating the dataset for year of tweet and a cleaned version of the date. However, the data was still not being recognized as numeric. So we transform it here.
+
+
+```{r}
+# Convert created_at variable into a date and time variable  
+tweets %<>% 
+    dplyr::mutate(created_at = as_datetime(created_at, tz = "UTC")) %>% 
+    dplyr::mutate(created_at = with_tz(created_at, tzone = "America/New_York"))
+
+hist(tweets$created_at, breaks = 5, col = "blue", ylab = "Frequency", xlab = "Year Posted", main = "Boycott Tweets by Year Posted")
+
+plot(tweets$created_at, main = "Boycott Tweets By Time Posted", lwd = 2, xlab = "Frequency", ylab = "Year Posted")
+```
+
+
+## Labor-related Keywords By Count and Over Time
+
+Here we identify key words associated with concerns over labor rights, and begin to understand them in the tweets. We call them from the data, transform them to lowercase, and get data frames and total counts. Next, we explore the individual labor rights related keywords over time.
+
+
+```{r}
+# Pull out mentions of terms of interest
+# Do this on original data and not cleaned data to catch all mentions and view from full tweets 
+
+labor <- tweets %>%
+  mutate(text = tolower(text)) %>%
+  filter(str_detect(text, "labor"))
+labor
+plot(labor$created_at, main = "Labor Tweets By Time Posted", lwd = 2, xlab = "Frequency", ylab = "Year Posted")
+hist(labor$created_at, breaks = 9
+     , col = "yellow", ylab = "Frequency", xlab = "Year Posted", main = "Labor Mentions in Boycott Tweets Over Time")
+count(labor)
+
+death <- tweets %>%
+  mutate(text = tolower(text)) %>%
+  filter(str_detect(text, "death"))
+death
+count(death)
+plot(death$created_at, main = "Death Tweets By Time Posted", lwd = 2, xlab = "Frequency", ylab = "Year Posted")
+hist(death$created_at, breaks = 9, col = "black", ylab = "Frequency", xlab = "Year Posted", main = "Death Mentions in Boycott Tweets Over Time")
+
+work <- tweets %>%
+  mutate(text = tolower(text)) %>%
+  filter(str_detect(text, "work"))
+work
+count(work)
+plot(work$created_at, main = "Work Tweets By Time Posted", lwd = 2, xlab = "Frequency", ylab = "Year Posted")
+hist(work$created_at, breaks =9, col = "darkgreen", ylab = "Frequency", xlab = "Year Posted", main = "Work Mentions in Boycott Tweets Over Time")
+
+rights <- tweets %>%
+  mutate(text = tolower(text)) %>%
+  filter(str_detect(text, "right"))
+rights
+count(rights)
+plot(rights$created_at, main = "Rights Tweets By Time Posted", lwd = 2, xlab = "Frequency", ylab = "Year Posted")
+hist(rights$created_at, breaks = 9, col = "darkblue", ylab = "Frequency", xlab = "Year Posted", main = "Right Mentions in Boycott Tweets Over Time")
+
+construction <- tweets %>%
+  mutate(text = tolower(text)) %>%
+  filter(str_detect(text, "construction"))
+construction
+count(construction)
+plot(construction$created_at, main = "Construction Tweets By Time Posted", lwd = 2, xlab = "Frequency", ylab = "Year Posted")
+hist(construction$created_at, breaks = 9, col = "orange", ylab = "Frequency", xlab = "Year Posted", main = "construction Mentions in Boycott Tweets Over Time")
+
+slavery <- tweets %>%
+  mutate(text = tolower(text)) %>%
+  filter(str_detect(text, "slavery"))
+slavery
+count(slavery)
+plot(slavery$created_at, main = "Slavery Tweets By Time Posted", lwd = 2, xlab = "Frequency", ylab = "Year Posted")
+hist(slavery$created_at, breaks = 9, col = "red", ylab = "Frequency", xlab = "Year Posted", main = "Slavery Mentions in Boycott Tweets Over Time")
+```
+
+
+# Modeling
+
+We will take a classification approach to modeling our data, using a logistic regression to perform supervised learning.
+
+To begin modeling our data, we will need to get a dataframe with all of the variables of interest. Our tweets_tidy_sum dataframe has the NRC information as well as the tweet text, which can be joined with the original tweets dataframe to get additional metrics.
+
+
+```{r}
+#| include: false
+
+tweets_model <- tweets_tidy_sum |> 
+    left_join(tweets, by=c("id", "author_id", "conversation_id"))
+
+```
+
+
+We will run a logistic regression to predict whether a tweet is overall negative or positive/neutral. To do that, we first need to assign a variable with the overall polarity. In our current dataframe, we just have the sums of polarized words.
+
+
+```{r}
+tweets_model$polarity <- ifelse(tweets_model$negative > tweets_model$positive,
+                                1, 0)
+
+tweets_model$polarity <- as.factor(tweets_model$polarity)
+```
+
+
+Then, we fit a logistic regression model.
+
+
+```{r}
+# fit a logistic regression with all predictors
+# we don't use the period to indicate all, as we do not want to user id numbers as predictors. This also lets us be explicit about what our predictors are. 
+
+fit.glm <- glm(
+    polarity ~ sadness + anger + fear + disgust + 
+        trust + surprise + joy + anticipation + 
+        Date_year + 
+        public_metrics.retweet_count + 
+        public_metrics.like_count + 
+        public_metrics.impression_count + 
+        public_metrics.reply_count + 
+        public_metrics.quote_count + 
+        public_metrics.impression_count, 
+    data = tweets_model,
+    family = binomial)
+
+summary(fit.glm)
+# stargazer(fit.glm) # we use stargazer to format output for our paper. 
+
+```
+
+
+This gives us a model and returns a number of "significant" coefficients. However, we know that the emotions are naturally grouped by negative/positive and are likely to be correlated with each other. We can take a look at a correlation matrix to see if that's the case.
+
+
+```{r}
+
+#When running variations of correlation matrices, we ran into an error of all NA returns. We identified missingness, adjusted approaches, and continued to have the issue. It ran successfully in Excel so given time constraints, we are reporting the Excel output here. 
+
+#tweets_model |> 
+    #select(fear, sadness, anger, disgust, trust, surprise, joy, anticipation, public_metrics.retweet_count, public_metrics.like_count, public_metrics.impression_count, public_metrics.reply_count, public_metrics.quote_count) |> 
+    #cor()
+
+#Running and visualizing the correlation matrix differently to see if results make more sense# 
+#corr_data <- tweets_model[c("fear", "sadness", "anger", "disgust", "trust", "surprise", "joy", "anticipation", "public_metrics.retweet_count", "public_metrics.like_count", "public_metrics.impression_count", "public_metrics.reply_count", "public_metrics.quote_count")]
+
+#cor_table <-cor(corr_data)
+
+
+#upper<-cor_table
+#upper[upper.tri(cor_table)]<-""
+#upper<-as.data.frame(upper)
+#upper
+
+#print(xtable(upper), type="html")
+
+```
+
+
+![](cor_emotions.png)
+
+![](cor_model.png)
+
+### Splitting train/test data
+
+We now move into more advanced methods, using a training and test set. It is important to perform subset selections using only the training set, in order to get an accurate test error rate later.
+
+
+```{r}
+# Split the data into training and testing sets (70% train, 30% test)
+set.seed(123)
+
+train_index <- sample(1:nrow(tweets_model), 0.7 * nrow(tweets_model))
+train_data <- tweets_model[train_index, ]
+test_data <- tweets_model[-train_index, ]
+```
+
+
+Note - some of the below methods do not work if there is missing data in the data frame. We can see that we have a very small amount of missing values in our predictor columns-\
+
+
+```{r}
+sapply(train_data, function(x) sum(is.na(x)))
+```
+
+
+So, we will simply drop these rows rather than trying to impute values.
+
+
+```{r}
+train_data <- train_data |> 
+    select(!c(geo.place_id, in_reply_to_user_id)) |> 
+    drop_na()
+
+test_data <- test_data |> 
+    select(!c(geo.place_id, in_reply_to_user_id)) |> 
+    drop_na()
+```
+
+
+### Best subset selection
+
+There are several methods for selecting which predictors will be the best to include in a model. We can use best subset, forward stepwise, or backward stepwise methods. The library "leaps" can perform these types of selection.
+
+Note that selection is based on training data, so that we can later get an unbiased test error estimate.
+
+Here we perform best subset selection and graph the results to see how many predictors we should include in our logistic regression model.
+
+
+```{r}
+subset <- regsubsets(polarity ~ sadness + anger + fear + disgust + 
+        trust + surprise + joy + anticipation + 
+        Date_year + 
+        public_metrics.retweet_count + 
+        public_metrics.like_count + 
+        public_metrics.impression_count + 
+        public_metrics.reply_count + 
+        public_metrics.quote_count + 
+        public_metrics.impression_count, 
+        data = train_data,
+        nvmax = 15)
+
+summary <- summary(subset)
+summary
+```
+
+
+From James et al. (2017), "The summary command outputs the best set of variables for each model size" (pg 268).
+
+The summary also returns information about R\^2, RSS, adjusted R\^2, $C_p$, and BIC. Let's look at those summaries to see what the best model might be.
+
+
+```{r}
+par(mfrow = c(2,2))
+plot(summary$rss, xlab = "Number of variables", 
+     ylab = "RSS", type = "b")
+which.min(summary$rss)
+points(11, summary$rss[15], col = "red", cex = 2, pch = 20)
+
+
+plot(summary$adjr2, xlab = "Number of variables",
+     ylab = "Adjusted RSq", type = "b")
+which.max(summary$adjr2)
+points(11, summary$adjr2[15], col = "red", cex = 2, pch = 20)
+
+plot(summary$cp, xlab = "number of variables", 
+     ylab = "CP", type = "b")
+which.min(summary$cp)
+points(11, summary$cp[15], col = "red", cex = 2, pch = 20)
+
+plot(summary$bic, xlab = "number of variables", ylab = "BIC", type = "b")
+which.min(summary$bic)
+points(11, summary$bic[14], col = "red", cex = 2, pch = 20)
+```
+
+
+The model with 11 predictors chosen by best subset selection includes variations on the year variable. The subset selection identified 2020, 2021, and 2022 as relevant predictors, but not the other years. To correctly represent our new model, let's create explicit binary variables for those years.
+
+
+```{r}
+# create binary variables indicating if a tweet was written in 2020, 2021, or 2022. 
+
+# do it for training date
+train_data <- train_data |> 
+    mutate(Date2020 = ifelse(Date_year == "2020-01-01", 1, 0),
+           Date2021 = ifelse(Date_year == "2021-01-01", 1, 0),
+           Date2022 = ifelse(Date_year == "2022-01-01", 1, 0))
+
+# do it again for testing data
+test_data <- test_data |> 
+    mutate(Date2020 = ifelse(Date_year == "2020-01-01", 1, 0),
+           Date2021 = ifelse(Date_year == "2021-01-01", 1, 0),
+           Date2022 = ifelse(Date_year == "2022-01-01", 1, 0))
+
+# and for the full data set
+tweets_model <- tweets_model |> 
+    mutate(Date2020 = ifelse(Date_year == "2020-01-01", 1, 0),
+           Date2021 = ifelse(Date_year == "2021-01-01", 1, 0),
+           Date2022 = ifelse(Date_year == "2022-01-01", 1, 0))
+```
+
+
+Then, let's set up our selected model.
+
+
+```{r}
+fit_subset <- glm(polarity ~ sadness + fear + disgust + 
+        trust + surprise + joy  + 
+        Date2020 + Date2021 + Date2022 +
+        public_metrics.retweet_count,
+        data = train_data,
+        family = binomial)
+
+summary(fit_subset)
+```
+
+
+### K-fold cross validation
+
+Finally, we will validate our model through k-fold cross validation, using 10 folds.
+
+
+```{r}
+
+# Set up the training control
+train_control <- trainControl(method = "cv", number = 10)
+
+# cross validate the logistic regression
+set.seed(123)
+model <- train(polarity ~ sadness + fear + disgust + 
+                trust + surprise + joy  + 
+                Date2020 + Date2021 + Date2022 +
+                public_metrics.retweet_count,
+               data = train_data,
+               method = "glm",
+               family=binomial())
+
+# Print the model
+print(model)
+
+# Make predictions on the test data
+predictions <- predict(model, test_data)
+
+# Calculate the accuracy of the model
+accuracy <- mean(predictions == test_data$polarity)
+cat("Accuracy:", accuracy)
+
+```
+
