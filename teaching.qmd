@@ -5,21 +5,21 @@ editor: visual
 
 ### Syllabi
 
--   [POLS 3314: Intro to Political Analysis](https://rebeccalarsen.github.io/3314.pdf)
+-   [POLS 3314: Intro to Political Analysis](https://rebeccalarsen.github.io/3314.pdf), Synchronous Online
 
--   [POLS 3300: Special Topics - Criminal Justice Reforms](https://rebeccalarsen.github.io/3300.pdf)
+-   [POLS 3300: Special Topics - Criminal Justice Reforms](https://rebeccalarsen.github.io/3300.pdf), Face-to-face & Synchronous Online
 
--   [POLS 3318: Public Opinion](https://rebeccalarsen.github.io/3318.pdf)
+-   [POLS 3318: Public Opinion](https://rebeccalarsen.github.io/3318.pdf), Synchronous Online
 
--   [POLS 3353: Civil Rights and Liberties](https://rebeccalarsen.github.io/3353.pdf)
+-   [POLS 3353: Civil Rights and Liberties](https://rebeccalarsen.github.io/3353.pdf), Face-to-face & Synchronous Online
 
--   [POLS 3352: Constitutional Law - Powers](https://rebeccalarsen.github.io/3352.pdf)
+-   [POLS 3352: Constitutional Law - Powers](https://rebeccalarsen.github.io/3352.pdf), Asynchronous Online
 
--   [POLS 3303: Special Topics - Nonprofits in Society](https://rebeccalarsen.github.io/3303.pdf)
+-   [POLS 3303: Special Topics - Nonprofits in Society](https://rebeccalarsen.github.io/3303.pdf), Face-to-face & Synchronous Online
 
--   [POLS 3317: Campaigns and Elections](https://rebeccalarsen.github.io/3317.pdf)
+-   [POLS 3317: Campaigns and Elections](https://rebeccalarsen.github.io/3317.pdf), Face-to-face & Synchronous Online
 
--   [POLS 4000: Active Learning - Texas Legislative Advocacy](https://rebeccalarsen.github.io/4000.pdf)
+-   [POLS 4000: Active Learning - Texas Legislative Advocacy](https://rebeccalarsen.github.io/4000.pdf), Face-to-face & Synchronous Online
 
 ### Sample of Course Materials
 
